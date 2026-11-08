@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TOLE2_ERI</title><link rel="icon" href="data:,">
+<style>
+:root{--bg:#f6f4ef;--sf:#fff;--tx:#1d1d1b;--mu:#6b6a65;--ac:#0f6e56;--bd:#ddd9cf;--dg:#b3261e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#161615;--sf:#222220;--tx:#eee;--mu:#a09f98;--ac:#5dcaa5;--bd:#38372f;--dg:#f2918a}}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--tx);font:16px system-ui,sans-serif}
+header{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--bg);z-index:5}
+h1{font-size:19px;margin:0}small,.mu{color:var(--mu)}
+button,input,select,textarea{font:inherit;color:var(--tx);background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:9px 11px}
+button{cursor:pointer}button.p{background:var(--ac);color:#fff;border-color:var(--ac)}button.d{color:var(--dg)}
+.w{padding:0 14px 80px;max-width:700px;margin:auto}.row{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap}.row>*{flex:1}
+.tabs button{border-radius:20px}.tabs button.on,.sx button.on{background:var(--ac);color:#fff}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:12px;margin:8px 0}
+.card h3{margin:0 0 4px;font-size:17px}.tag{font-size:12px;color:var(--ac)}
+img.b{width:100%;max-height:260px;object-fit:contain;background:#fff;border-radius:10px;margin:8px 0}
+.ph{height:110px;border:1px dashed var(--bd);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--mu);font-size:13px;margin:8px 0;text-align:center;padding:6px}
+a{color:var(--ac)}.m{position:fixed;inset:0;background:#0008;display:flex;align-items:flex-end;z-index:9}
+.m>div{background:var(--bg);width:100%;max-height:92%;overflow:auto;padding:14px;border-radius:18px 18px 0 0}
+.m label{display:block;margin-top:8px;font-size:13px;color:var(--mu)}.m input,.m textarea,.m select{width:100%}
+</style></head><body>
+<header><h1>🦴 TOLE2_ERI</h1><div><small id="rl"></small> <button id="lg"></button></div></header>
+<div class="w">
+<div class="row tabs"><button data-t="o">Huesos</button><button data-t="r">Radiología</button><button data-t="e">Esquema</button></div>
+<div class="row sx"><button data-s="f">♀ Femenino</button><button data-s="m">♂ Masculino</button></div>
+<div class="row"><input id="q" placeholder="Buscar…"><button class="p" id="ad">+ Agregar</button></div>
+<div id="ls"></div>
+<p class="mu" style="font-size:12px">Funciona sin internet. Los enlaces de definición requieren conexión; cada ficha incluye su definición offline.</p>
+</div><div id="md"></div>
+<script>
+const PW="33540980",K="tole2eri_v1";
+const B=(n,r,d,l,df)=>({id:"b"+n,n,r,d,l,df:df||"Sin diferencia estructural relevante; el masculino suele ser algo más largo y robusto.",by:"admin"});
+const DEF={bones:[
+B("Frontal","Cráneo","Forma la frente y el techo de las órbitas.","Hueso_frontal","En la mujer la frente es más vertical y los arcos superciliares son menos marcados."),
+B("Parietal","Cráneo","Par de huesos que forman los lados y el techo del cráneo.","Hueso_parietal"),
+B("Occipital","Cráneo","Forma la base posterior del cráneo; contiene el foramen magno.","Hueso_occipital","En el hombre la protuberancia occipital externa es más marcada."),
+B("Temporal","Cráneo","Aloja el oído medio e interno; incluye la apófisis mastoides y estiloides.","Hueso_temporal","La apófisis mastoides es mayor en el hombre."),
+B("Esfenoides","Cráneo","Hueso central de la base del cráneo, con la silla turca.","Hueso_esfenoides"),
+B("Etmoides","Cráneo","Entre las órbitas; forma parte de la nariz y las celdillas etmoidales.","Hueso_etmoides"),
+B("Maxilar","Cara","Forma la mandíbula superior, paladar y parte de la órbita.","Maxilar_superior"),
+B("Cigomático","Cara","Hueso del pómulo.","Hueso_cigomático"),
+B("Nasal","Cara","Par de huesos que forman el puente de la nariz.","Hueso_nasal"),
+B("Mandíbula","Cara","Único hueso móvil de la cabeza; articula con el temporal (ATM).","Mandíbula","El mentón es más cuadrado en el hombre y más puntiforme en la mujer."),
+B("Hioides","Cuello","Hueso en U sin articulación directa con otro hueso; soporta la lengua.","Hueso_hioides"),
+B("Atlas (C1)","Columna","Primera vértebra cervical; sostiene el cráneo.","Atlas_(anatomía)"),
+B("Axis (C2)","Columna","Segunda cervical con apófisis odontoides.","Axis_(anatomía)"),
+B("Vértebras cervicales (C3–C7)","Columna","Cinco vértebras con agujero transverso.","Vértebras_cervicales"),
+B("Vértebras torácicas (T1–T12)","Columna","Doce vértebras que articulan con las costillas.","Vértebras_torácicas"),
+B("Vértebras lumbares (L1–L5)","Columna","Cinco vértebras grandes que soportan carga.","Vértebras_lumbares"),
+B("Sacro","Columna","Cinco vértebras fusionadas; une la columna con la pelvis.","Sacro","En la mujer es más corto, ancho y menos curvo."),
+B("Cóccix","Columna","Vestigio de la cola; 3–5 vértebras fusionadas.","Cóccix"),
+B("Esternón","Tórax","Hueso plano central: manubrio, cuerpo y apéndice xifoides.","Esternón"),
+B("Costillas (12 pares)","Tórax","7 verdaderas, 3 falsas y 2 flotantes; protegen órganos torácicos.","Costilla"),
+B("Clavícula","Hombro","Hueso en S entre esternón y acromion.","Clavícula"),
+B("Escápula","Hombro","Hueso plano triangular posterior del tórax.","Escápula"),
+B("Húmero","Brazo","Hueso largo del brazo.","Húmero"),
+B("Radio","Antebrazo","Hueso lateral del antebrazo.","Radio_(hueso)"),
+B("Cúbito (ulna)","Antebrazo","Hueso medial del antebrazo; forma el olécranon.","Cúbito"),
+B("Carpo (8 huesos)","Mano","Escafoides, semilunar, piramidal, pisiforme, trapecio, trapezoide, grande y ganchoso.","Huesos_del_carpo"),
+B("Metacarpianos (5)","Mano","Huesos de la palma.","Metacarpo"),
+B("Falanges de la mano (14)","Mano","Proximal, media y distal; el pulgar no tiene media.","Falange_(anatomía)"),
+B("Coxal (hueso de la cadera)","Pelvis","Fusión de ilion, isquion y pubis.","Hueso_coxal","Pelvis femenina: más ancha, estrecho superior ovalado, arco subpúbico amplio (>90°). Masculina: estrecha, en forma de corazón, arco <90°."),
+B("Fémur","Pierna","Hueso más largo y fuerte del cuerpo.","Fémur"),
+B("Rótula","Rodilla","Hueso sesamoideo dentro del tendón del cuádriceps.","Rótula"),
+B("Tibia","Pierna","Hueso medial y principal de la pierna.","Tibia_(hueso)"),
+B("Peroné (fíbula)","Pierna","Hueso lateral delgado de la pierna.","Peroné"),
+B("Tarso (7 huesos)","Pie","Calcáneo, astrágalo, navicular, cuboides y 3 cuneiformes.","Huesos_del_tarso"),
+B("Metatarsianos (5)","Pie","Huesos del antepié.","Metatarso"),
+B("Falanges del pie (14)","Pie","Huesos de los dedos del pie.","Falange_(anatomía)")
+],radio:[
+{id:"r1",n:"Proyecciones básicas",r:"Resumen",d:"AP, PA, lateral y oblicua. Se nombran por la dirección en que el haz atraviesa al paciente (entrada→salida).",by:"admin"},
+{id:"r2",n:"Densidades radiológicas",r:"Resumen",d:"Del más blanco al más negro: metal, hueso/calcio, tejidos blandos/agua, grasa, aire.",by:"admin"},
+{id:"r3",n:"Lectura sistemática ABC",r:"Resumen",d:"A: alineación. B: huesos (cortical, trabéculas). C: cartílago/articulación. S: tejidos blandos.",by:"admin"},
+{id:"r4",n:"Fracturas: descripción",r:"Resumen",d:"Localización, trazo (transverso, oblicuo, espiroideo, conminuto), desplazamiento, angulación, abierta/cerrada, afectación articular.",by:"admin"},
+{id:"r5",n:"Definiciones clave",r:"Glosario",d:"Cortical: capa externa densa. Esclerosis: aumento de densidad. Osteopenia: disminución de densidad. Lisis: destrucción ósea. Reacción perióstica: respuesta del periostio a lesión.",by:"admin"},
+{id:"r6",n:"Protección radiológica",r:"Resumen",d:"Principio ALARA: tan bajo como sea razonablemente posible. Tiempo, distancia y blindaje.",by:"admin"},
+{id:"r7",n:"Tipos de fractura",r:"Manual",d:"Completa/incompleta; en tallo verde (niños); por avulsión; por estrés; patológica (hueso debilitado); impactada; conminuta (varios fragmentos); segmentaria.",by:"admin"},
+{id:"r8",n:"Clasificación de Salter-Harris",r:"Manual",d:"Fracturas de la placa de crecimiento: I separación; II metáfisis; III epífisis; IV metáfisis y epífisis; V compresión. Regla: SALTR.",by:"admin"},
+{id:"r9",n:"Luxación vs subluxación",r:"Glosario",d:"Luxación: pérdida total del contacto articular. Subluxación: contacto parcial.",by:"admin"},
+{id:"r10",n:"Tórax PA: puntos clave",r:"Manual",d:"Calidad: inspiración (6 arcos anteriores), centrado, penetración (se ven vértebras tras el corazón). Revisar silueta cardíaca (índice <0,5), senos costofrénicos, hilios, campos pulmonares y huesos.",by:"admin"},
+{id:"r11",n:"Columna: líneas de alineación",r:"Manual",d:"En lateral cervical: cuerpo anterior, posterior, espinolaminar y puntas espinosas deben formar curvas continuas. Espacio prevertebral: <7 mm en C2, <22 mm en C6.",by:"admin"},
+{id:"r12",n:"Osteoporosis y densitometría",r:"Glosario",d:"DXA: T-score ≥ −1 normal; entre −1 y −2,5 osteopenia; ≤ −2,5 osteoporosis. Radiografía simple solo muestra pérdida avanzada (>30–40 %).",by:"admin"},
+{id:"r13",n:"Otras modalidades",r:"Resumen",d:"TC: mejor detalle óseo y cortical. RM: médula ósea, cartílago, ligamentos. Ecografía: partes blandas. Gammagrafía: actividad metabólica ósea.",by:"admin"},
+{id:"r14",n:"Signos de malignidad ósea",r:"Glosario",d:"Zona de transición ancha, reacción perióstica agresiva (en rayos de sol, triángulo de Codman), destrucción cortical, masa de partes blandas.",by:"admin"}
+]};
+let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
+S=S&&S.bones?S:JSON.parse(JSON.stringify(DEF));
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){alert("Almacenamiento lleno: usa imágenes más pequeñas.")}};
+let st={role:"user",sex:"f",tab:"o"};
+const $=s=>document.querySelector(s),esc=t=>(t||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const can=i=>st.role=="admin"||i.by=="user";
+function draw(){
+ $("#rl").textContent=st.role=="admin"?"Admin":"Usuario";$("#lg").textContent=st.role=="admin"?"Salir":"Admin";
+ document.querySelectorAll("[data-t]").forEach(b=>b.classList.toggle("on",b.dataset.t==st.tab));
+ document.querySelectorAll("[data-s]").forEach(b=>b.classList.toggle("on",b.dataset.s==st.sex));
+ $(".sx").style.display=st.tab=="o"?"flex":"none";if(st.tab=="e")return esq();
+ const q=$("#q").value.toLowerCase(),L=(st.tab=="o"?S.bones:S.radio).filter(i=>(i.n+i.r+i.d).toLowerCase().includes(q));
+ $("#ls").innerHTML=L.map(i=>{const im=i["img_"+st.sex],df=st.sex=="f"?(i.dfF||i.df):(i.dfM||i.df);
+ return `<div class="card"><span class="tag">${esc(i.r)}${i.by=="user"?" · agregado por usuario":""}</span><h3>${esc(i.n)}</h3>
+ ${st.tab=="o"?(im?`<img class="b" src="${im}">`:`<div class="ph">Sin imagen ${st.sex=="f"?"femenina":"masculina"}${can(i)?" — súbela en Editar":""}</div>`):""}
+ <div>${esc(i.d)}</div>${st.tab=="o"?`<p class="mu" style="margin:6px 0"><b>${st.sex=="f"?"♀":"♂"} Diferencias:</b> ${esc(df)}</p>`:""}
+ ${i.l?`<a href="${i.l.startsWith("http")?esc(i.l):"https://es.wikipedia.org/wiki/"+encodeURI(i.l)}" target="_blank" rel="noopener">Definición completa ↗</a>`:""}
+ <div class="row">${can(i)?`<button onclick="ed('${i.id}')">Editar</button>`:""}${can(i)?`<button class="d" onclick="del('${i.id}')">Borrar</button>`:""}</div></div>`}).join("")||"<p class=mu>Sin resultados.</p>";
+}
+const arr=()=>st.tab=="o"?S.bones:S.radio;
+function ed(id){
+ const i=id?arr().find(x=>x.id==id):{n:"",r:"",d:"",l:"",df:"",dfF:"",dfM:""},o=st.tab=="o";
+ $("#md").innerHTML=`<div class="m"><div><h3>${id?"Editar":"Agregar"}</h3>
+ <label>Nombre</label><input id="f1" value="${esc(i.n)}"><label>Región / categoría</label><input id="f2" value="${esc(i.r)}">
+ <label>Definición</label><textarea id="f3" rows="4">${esc(i.d)}</textarea>
+ <label>Enlace (URL o título de Wikipedia)</label><input id="f4" value="${esc(i.l)}">
+ ${o?`<label>Diferencias femenino</label><textarea id="f5" rows="2">${esc(i.dfF||i.df)}</textarea><label>Diferencias masculino</label><textarea id="f6" rows="2">${esc(i.dfM||i.df)}</textarea>
+ <label>Imagen femenina</label><input type="file" accept="image/*" id="g1"><label>Imagen masculina</label><input type="file" accept="image/*" id="g2">`:""}
+ <div class="row"><button onclick="md.innerHTML=''">Cancelar</button><button class="p" onclick="sv('${id||""}')">Guardar</button></div></div></div>`;
+}
+const rd=f=>new Promise(r=>{if(!f)return r(null);const x=new FileReader;x.onload=()=>{const m=new Image;m.onload=()=>{const k=Math.min(1,700/Math.max(m.width,m.height)),c=document.createElement("canvas");c.width=m.width*k;c.height=m.height*k;c.getContext("2d").drawImage(m,0,0,c.width,c.height);r(c.toDataURL("image/jpeg",.8))};m.src=x.result};x.readAsDataURL(f)});
+async function sv(id){
+ const n=$("#f1").value.trim();if(!n)return alert("Falta el nombre");
+ let i=id?arr().find(x=>x.id==id):{id:"u"+Date.now(),by:st.role=="admin"?"admin":"user"};
+ Object.assign(i,{n,r:$("#f2").value.trim()||"General",d:$("#f3").value.trim(),l:$("#f4").value.trim()});
+ if(st.tab=="o"){i.dfF=$("#f5").value;i.dfM=$("#f6").value;const a=await rd($("#g1").files[0]),b=await rd($("#g2").files[0]);if(a)i.img_f=a;if(b)i.img_m=b}
+ if(!id)arr().push(i);save();md.innerHTML="";draw();
+}
+function del(id){if(!confirm("¿Borrar?"))return;const a=arr();a.splice(a.findIndex(x=>x.id==id),1);save();draw()}
+function go(t){st.tab="o";$("#q").value=t;draw()}
+function esq(){const z=(t,s)=>`onclick="go('${t}')" style="cursor:pointer" ${s}`,f='fill="var(--sf)" stroke="var(--ac)" stroke-width="2"';
+$("#ls").innerHTML=`<p class=mu>Toca una zona para ver sus huesos.</p><svg viewBox="0 0 240 460" style="width:100%;max-height:70vh">
+<circle cx="120" cy="34" r="26" ${z('Cráneo',f)}/><rect x="108" y="60" width="24" height="18" ${z('Hioides',f)}/>
+<rect x="114" y="78" width="12" height="130" rx="5" ${z('Vértebras',f)}/>
+<ellipse cx="120" cy="125" rx="46" ry="50" ${z('Costillas',f)} fill-opacity=".4"/>
+<rect x="112" y="90" width="16" height="60" rx="6" ${z('Esternón',f)}/>
+<path d="M74 88 L112 84 M128 84 L166 88" ${z('Clavícula','stroke="var(--ac)" stroke-width="7" fill="none"')}/>
+<rect x="56" y="92" width="14" height="90" rx="7" ${z('Húmero',f)}/><rect x="170" y="92" width="14" height="90" rx="7" ${z('Húmero',f)}/>
+<rect x="48" y="186" width="12" height="84" rx="6" ${z('Radio',f)}/><rect x="180" y="186" width="12" height="84" rx="6" ${z('Radio',f)}/>
+<rect x="40" y="274" width="26" height="34" rx="8" ${z('Carpo',f)}/><rect x="174" y="274" width="26" height="34" rx="8" ${z('Carpo',f)}/>
+<path d="M72 214 Q120 190 168 214 L156 262 Q120 280 84 262Z" ${z('Coxal',f)}/>
+<rect x="78" y="266" width="22" height="100" rx="10" ${z('Fémur',f)}/><rect x="140" y="266" width="22" height="100" rx="10" ${z('Fémur',f)}/>
+<circle cx="89" cy="372" r="9" ${z('Rótula',f)}/><circle cx="151" cy="372" r="9" ${z('Rótula',f)}/>
+<rect x="80" y="384" width="18" height="50" rx="8" ${z('Tibia',f)}/><rect x="142" y="384" width="18" height="50" rx="8" ${z('Tibia',f)}/>
+<ellipse cx="86" cy="448" rx="20" ry="9" ${z('Tarso',f)}/><ellipse cx="154" cy="448" rx="20" ry="9" ${z('Tarso',f)}/></svg>`}
+$("#lg").onclick=()=>{if(st.role=="admin"){st.role="user";return draw()}const p=prompt("Contraseña de administrador");if(p===PW){st.role="admin";draw()}else if(p!==null)alert("Contraseña incorrecta")};
+$("#ad").onclick=()=>ed();$("#q").oninput=draw;
+document.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{st.tab=b.dataset.t;draw()});
+document.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{st.sex=b.dataset.s;draw()});
+draw();
+</script></body></html>
